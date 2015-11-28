@@ -156,7 +156,7 @@ define([
 							return 'http://asa.sbh.nz/complainant/' + d.replace(/\s/g, '+');
 						})
 						.attr('class', 'person')
-						.attr('transform', 'translate(20 200)');
+						.attr('transform', 'translate(20 240)');
 
 		people
 			.append('circle')
@@ -181,7 +181,9 @@ define([
 				})
 				.text(function (d) {return d;});
 
-		$(svg[0]).closest('.loading').removeClass('loading');
+		window.setTimeout(function () {
+			$(svg[0]).closest('.loading').removeClass('loading');
+		}, 0.5);
 
 		// Bind events
 		complaintCircles

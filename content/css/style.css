@@ -40,3 +40,12 @@ html, body {
     transform: rotate(360deg);
   }
 }
+
+.loading circle {
+  r: 0;
+  transition: r 1s;
+}
+
+circle {
+  transition: opacity 0.2s, r 0.2s;
+}
