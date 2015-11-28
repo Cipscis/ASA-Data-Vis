@@ -92,15 +92,15 @@ define([
 			}
 		}
 
-		var getPersonColour = function (person) {
-			return 'hsla(' + ((colourIndex.indexOf(person)+1)/members.length*360) + ', 100%, 50%, 0.5)';
+		var getPersonColour = function (person, opacity) {
+			return 'hsl(' + ((colourIndex.indexOf(person)+1)/members.length*360) + ', 100%, 50%)';
 		};
 
 
 		svg = d3.select('.asa-data');
 		svg.attr({
 			width: 900,
-			height: 700
+			height: 400
 		});
 
 		// Bind and draw complaint circles
@@ -133,13 +133,20 @@ define([
 					r: 10
 				})
 				.style({
-					fill: function (d) {return getPersonColour(d.complainants[0]);}
+					fill: function (d) {return getPersonColour(d.complainants[0]);},
+					opacity: 0.5
 				});
 
 		complaintCircles.append('title')
 			.text(function (d) {return d.idslash + ': ' + d.advert;});
 
 		// Bind and draw people
+		var circleRadius = 10,
+			circleRadiusHi = 20,
+			circleOpacity = 0.5,
+			circleOpacityLo = 0.1,
+			circleOpacityHi = 0.9;
+
 		people = svg.append('g')
 			.attr('class', 'people')
 				.selectAll('g')
@@ -158,10 +165,11 @@ define([
 						return i*30;
 					},
 					cy: 0,
-					r: 10
+					r: circleRadius
 				})
 				.style({
-					fill: getPersonColour
+					fill: getPersonColour,
+					opacity: circleOpacity
 				});
 
 		people
@@ -171,10 +179,9 @@ define([
 					dx: 15,
 					transform: 'rotate(90)'
 				})
-				.style({
-					'font-family': 'Lato, sans-serif'
-				})
 				.text(function (d) {return d;});
+
+		$(svg[0]).closest('.loading').removeClass('loading');
 
 		// Bind events
 		complaintCircles
@@ -182,7 +189,7 @@ define([
 				people.data(membersSorted).selectAll('circle')
 					.attr({
 						r: function (d) {
-							return util.contains(d, e.complainants) ? 20 : 10;
+							return util.contains(d, e.complainants) ? circleRadiusHi : circleRadius;
 						}
 					});
 				complaintCircles.data(complaints).selectAll('circle')
@@ -194,39 +201,56 @@ define([
 							for (i = 0; i < e.complainants.length; i++) {
 								containsComplainant = containsComplainant || util.contains(e.complainants[i], d.complainants);
 							}
-							return containsComplainant ? 20 : 10;
+							return containsComplainant ? circleRadiusHi : circleRadius;
+						}
+					})
+					.style({
+						opacity: function (d) {
+							var containsComplainant = false,
+								i;
+
+							for (i = 0; i < e.complainants.length; i++) {
+								containsComplainant = containsComplainant || util.contains(e.complainants[i], d.complainants);
+							}
+							return containsComplainant ? circleOpacity : circleOpacityLo;
 						}
 					});
 			})
 			.on('mouseout', function (e) {
 				people.selectAll('circle')
-					.attr({
-						r: 10
-					});
+					.attr('r', circleRadius);
 				complaintCircles.selectAll('circle')
-					.attr({
-						r: 10
-					});
+					.attr('r', circleRadius)
+					.style('opacity', circleOpacity);
 			});
 
 		people
 			.on('mouseover', function (e) {
 				d3.select(this).selectAll('circle')
-					.attr('r', 20);
+					.attr('r', circleRadiusHi)
+					.style('opacity', circleOpacity);
 				complaintCircles.data(complaints).selectAll('circle')
 					.attr({
 						r: function (d) {
-							return util.contains(e, d.complainants) ? 20 : 10;
+							return util.contains(e, d.complainants) ? circleRadiusHi : circleRadius;
+						}
+					})
+					.style({
+						opacity: function (d) {
+							return util.contains(e, d.complainants) ? circleOpacity : circleOpacityLo;
+						},
+						'z-index': function (d) {
+							return util.contains(e, d.complainants) ? 2 : 1;
 						}
 					});
 			})
 			.on('mouseout', function (e) {
 				d3.select(this).selectAll('circle')
-					.attr('r', 10);
+					.attr('r', circleRadius)
+					.style('opacity', circleOpacity);
 				complaintCircles.selectAll('circle')
-					.attr({
-						r: 10
-					});
+					.attr('r', circleRadius)
+					.style('opacity', circleOpacity);
 			});
 	};
 
