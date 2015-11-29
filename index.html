@@ -10,8 +10,9 @@
 	<script type="text/javascript">
 		require(['jquery'], function ($) {
 			$(function () {
-				require(['asa/sbhBubbles'], function (asa) {
-					asa.init();
+				// require(['asa/sbhBubbles'], function (asa) {
+				require(['asa/winLossArea'], function (asa) {
+					asa.init('http://asa.sbh.nz/complaints.json', 90);
 				});
 			});
 		});

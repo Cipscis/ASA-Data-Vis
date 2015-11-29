@@ -11,8 +11,6 @@ define([
 		complaints, complaintsIndex,
 		colourIndex,
 
-		i, j,
-
 		width = 900,
 		height = 400,
 		hGutter = 20,
@@ -54,6 +52,8 @@ define([
 	var _processComplaints = function (data) {
 		/// Produce complaints object from JSON
 
+		var i;
+
 		data = data.responseJSON;
 
 		complaints = [];
@@ -77,6 +77,8 @@ define([
 
 	var _processMembers = function (data) {
 		/// Produce members and membersSorted objects from JSON
+
+		var i;
 
 		data = data.responseJSON;
 
@@ -130,6 +132,7 @@ define([
 	};
 
 	var _initColours = function () {
+		var i, j;
 		colourIndex = [];
 		for (i = 0; i < 6; i++) {
 			for (j = i; j < membersSorted.length; j += 6) {
@@ -148,7 +151,7 @@ define([
 			.range([hGutter, (height-vGutter - 50) + hGutter]);
 
 		xScale = d3.time.scale()
-			.domain([(new Date('2008').getTime()), (new Date('2016').getTime())])
+			.domain([d3.min(complaints, function (d) {return new Date(d.meetingdate);}), d3.max(complaints, function (d) {return new Date(d.meetingdate);})])
 			.range([hGutter, width-hGutter]);
 	};
 
@@ -167,7 +170,7 @@ define([
 	var _drawComplaints = function () {
 		complaintCircles = svg.append('g')
 			.attr('class', 'complaints')
-				.selectAll('.circle')
+				.selectAll('circle')
 				.data(complaints).enter()
 				.append('a')
 					.attr('xlink:href', function (d) {return d.links.sbh;});

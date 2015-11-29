@@ -17,3 +17,10 @@ circle {
 		transform: translate(0, 5px);
 	}
 }
+
+.area {
+	opacity: 0.8;
+	&:hover {
+		opacity: 1;
+	}
+}

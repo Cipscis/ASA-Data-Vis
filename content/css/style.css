@@ -59,3 +59,11 @@ circle {
 .axis text {
   transform: translate(0, 5px);
 }
+
+.area {
+  opacity: 0.8;
+}
+
+.area:hover {
+  opacity: 1;
+}
