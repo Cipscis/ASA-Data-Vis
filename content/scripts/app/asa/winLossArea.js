@@ -21,6 +21,8 @@ define([
 		yScale2, yAxis2,
 		xScale, xAxis,
 
+		lessThanOneYear,
+
 		winArea, lossArea, drawArea,
 		percentLine;
 
@@ -178,6 +180,8 @@ define([
 	};
 
 	var _createScales = function () {
+		var firstDate, lastDate;
+
 		yScale = d3.scale.linear()
 			.domain([0, d3.max(runningAverage, function (d) {return d.complaints;})])
 			.range([height - vGutter, vGutter]);
@@ -186,8 +190,16 @@ define([
 			.domain([0, 1])
 			.range([height-vGutter, vGutter]);
 
+		firstDate = d3.min(runningAverage, function (d) {return d.date;});
+		lastDate = d3.max(runningAverage, function (d) {return d.date;});
+
+		// Milliseconds in one leap year
+		if (lastDate - firstDate < 31536000000) {
+			lessThanOneYear = true;
+		}
+
 		xScale = d3.time.scale()
-			.domain([d3.min(runningAverage, function (d) {return d.date;}), d3.max(runningAverage, function (d) {return d.date;})])
+			.domain([firstDate, lastDate])
 			.range([hGutter, width - hGutter]);
 	};
 
@@ -200,7 +212,7 @@ define([
 	var _drawXAxis = function () {
 		xAxis = d3.svg.axis()
 			.scale(xScale)
-			.ticks(d3.time.years)
+			.ticks(lessThanOneYear ? d3.time.months : d3.time.years)
 			.orient('bottom');
 
 		svg
