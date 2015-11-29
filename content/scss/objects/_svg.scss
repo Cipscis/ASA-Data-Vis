@@ -6,3 +6,14 @@
 circle {
 	transition: opacity 0.2s, r 0.2s;
 }
+
+.axis {
+	path, line {
+		fill: none;
+		stroke: #ccc;
+		shape-rendering: crispEdges;
+	}
+	text {
+		transform: translate(0, 5px);
+	}
+}

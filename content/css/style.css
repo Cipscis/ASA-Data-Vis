@@ -49,3 +49,13 @@ html, body {
 circle {
   transition: opacity 0.2s, r 0.2s;
 }
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #ccc;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  transform: translate(0, 5px);
+}

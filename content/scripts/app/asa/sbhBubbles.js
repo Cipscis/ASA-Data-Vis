@@ -10,10 +10,25 @@ define([
 		members, membersSorted,
 		complaints, complaintsIndex,
 		colourIndex,
+
 		i, j,
-		svg, complaintCircles, people;
+
+		width = 900,
+		height = 400,
+		hGutter = 20,
+		vGutter = 200,
+
+		svg,
+		xScale, xAxis,
+		complaintCircles, people;
 
 	var init = function () {
+		svg = d3.select('.asa-data');
+		svg.attr({
+			width: width,
+			height: height
+		});
+
 		$.ajax({
 			url: complaintsUrl,
 			dataType: 'jsonp'
@@ -96,12 +111,20 @@ define([
 			return 'hsl(' + ((colourIndex.indexOf(person)+1)/members.length*360) + ', 100%, 50%)';
 		};
 
+		// Create scale and axis
+		xScale = d3.time.scale()
+			.domain([(new Date('2008').getTime()), (new Date('2016').getTime())])
+			.range([hGutter, width-hGutter]);
 
-		svg = d3.select('.asa-data');
-		svg.attr({
-			width: 900,
-			height: 400
-		});
+		xAxis = d3.svg.axis()
+			.scale(xScale)
+			.ticks(d3.time.years)
+			.orient('bottom');
+
+		svg.append('g')
+			.attr('class', 'axis')
+			.attr('transform', 'translate(0, ' + (height-vGutter) + ')')
+			.call(xAxis);
 
 		// Bind and draw complaint circles
 		complaintCircles = svg.append('g')
@@ -115,21 +138,11 @@ define([
 			.append('circle')
 				.attr({
 					cx: function (d) {
-						var date = new Date(d.meetingdate),
-							year = new Date(d.meetingdate),
-							ms = 1000*60*60*24*365.25;
+						var date = new Date(d.meetingdate);
 
-						if (!date.getTime()) {
-							return -100;
-						}
-
-						year.setMonth(0);
-						year.setDate(1);
-						year.setFullYear(2008);
-
-						return (date-year)/ms/8*900;
+						return date.getTime() ? xScale(date) : -100;
 					},
-					cy: function (d) {return Math.random() * 150+20;},
+					cy: function (d) {return Math.random() * (height-vGutter - 50)+hGutter;},
 					r: 10
 				})
 				.style({
@@ -145,7 +158,7 @@ define([
 			circleRadiusHi = 20,
 			circleOpacity = 0.5,
 			circleOpacityLo = 0.1,
-			circleOpacityHi = 0.9;
+			circleOpacityHi = 0.7;
 
 		people = svg.append('g')
 			.attr('class', 'people')
@@ -156,7 +169,7 @@ define([
 							return 'http://asa.sbh.nz/complainant/' + d.replace(/\s/g, '+');
 						})
 						.attr('class', 'person')
-						.attr('transform', 'translate(20 240)');
+						.attr('transform', 'translate(' + hGutter + ' ' + (height-160) + ')');
 
 		people
 			.append('circle')
@@ -181,6 +194,8 @@ define([
 				})
 				.text(function (d) {return d;});
 
+		// Remove loader
+		// Timeout allows CSS transitions to take place
 		window.setTimeout(function () {
 			$(svg[0]).closest('.loading').removeClass('loading');
 		}, 0.5);
@@ -192,6 +207,11 @@ define([
 					.attr({
 						r: function (d) {
 							return util.contains(d, e.complainants) ? circleRadiusHi : circleRadius;
+						}
+					})
+					.style({
+						opacity: function (d) {
+							return util.contains(d, e.complainants) ? circleOpacityHi : circleOpacity;
 						}
 					});
 				complaintCircles.data(complaints).selectAll('circle')
@@ -214,7 +234,7 @@ define([
 							for (i = 0; i < e.complainants.length; i++) {
 								containsComplainant = containsComplainant || util.contains(e.complainants[i], d.complainants);
 							}
-							return containsComplainant ? circleOpacity : circleOpacityLo;
+							return containsComplainant ? circleOpacityHi : circleOpacityLo;
 						}
 					});
 			})
@@ -230,7 +250,7 @@ define([
 			.on('mouseover', function (e) {
 				d3.select(this).selectAll('circle')
 					.attr('r', circleRadiusHi)
-					.style('opacity', circleOpacity);
+					.style('opacity', circleOpacityHi);
 				complaintCircles.data(complaints).selectAll('circle')
 					.attr({
 						r: function (d) {
@@ -239,10 +259,7 @@ define([
 					})
 					.style({
 						opacity: function (d) {
-							return util.contains(e, d.complainants) ? circleOpacity : circleOpacityLo;
-						},
-						'z-index': function (d) {
-							return util.contains(e, d.complainants) ? 2 : 1;
+							return util.contains(e, d.complainants) ? circleOpacityHi : circleOpacityLo;
 						}
 					});
 			})
