@@ -18,17 +18,33 @@ define([
 		hGutter = 20,
 		vGutter = 200,
 
+		circleRadius = 10,
+		circleRadiusHi = 20,
+		circleOpacity = 0.5,
+		circleOpacityLo = 0.1,
+		circleOpacityHi = 0.7,
+
+		getPersonColour,
+
 		svg,
+		yScale,
 		xScale, xAxis,
 		complaintCircles, people;
 
 	var init = function () {
+		_createSvg();
+		_getData();
+	};
+
+	var _createSvg = function () {
 		svg = d3.select('.asa-data');
 		svg.attr({
 			width: width,
 			height: height
 		});
+	};
 
+	var _getData = function () {
 		$.ajax({
 			url: complaintsUrl,
 			dataType: 'jsonp'
@@ -97,9 +113,23 @@ define([
 
 
 	var _createInteractive = function () {
-		/// Create interactive chart
+		_initColours();
 
-		// Created colourIndex by splitting adjacent members
+		_createScales();
+		_drawAxis();
+		_drawComplaints();
+		_drawLegend();
+
+		// Remove loader
+		// Timeout allows CSS transitions to take place
+		window.setTimeout(function () {
+			$(svg[0]).closest('.loading').removeClass('loading');
+		}, 0.5);
+
+		_bindEvents();
+	};
+
+	var _initColours = function () {
 		colourIndex = [];
 		for (i = 0; i < 6; i++) {
 			for (j = i; j < membersSorted.length; j += 6) {
@@ -107,15 +137,22 @@ define([
 			}
 		}
 
-		var getPersonColour = function (person, opacity) {
+		getPersonColour = function (person, opacity) {
 			return 'hsl(' + ((colourIndex.indexOf(person)+1)/members.length*360) + ', 100%, 50%)';
 		};
+	};
 
-		// Create scale and axis
+	var _createScales = function () {
+		yScale = d3.scale.linear()
+			.domain([0, 1])
+			.range([hGutter, (height-vGutter - 50) + hGutter]);
+
 		xScale = d3.time.scale()
 			.domain([(new Date('2008').getTime()), (new Date('2016').getTime())])
 			.range([hGutter, width-hGutter]);
+	};
 
+	var _drawAxis = function () {
 		xAxis = d3.svg.axis()
 			.scale(xScale)
 			.ticks(d3.time.years)
@@ -125,8 +162,9 @@ define([
 			.attr('class', 'axis')
 			.attr('transform', 'translate(0, ' + (height-vGutter) + ')')
 			.call(xAxis);
+	};
 
-		// Bind and draw complaint circles
+	var _drawComplaints = function () {
 		complaintCircles = svg.append('g')
 			.attr('class', 'complaints')
 				.selectAll('.circle')
@@ -142,24 +180,19 @@ define([
 
 						return date.getTime() ? xScale(date) : -100;
 					},
-					cy: function (d) {return Math.random() * (height-vGutter - 50)+hGutter;},
-					r: 10
+					cy: function (d) {return yScale(Math.random());},
+					r: circleRadius
 				})
 				.style({
 					fill: function (d) {return getPersonColour(d.complainants[0]);},
-					opacity: 0.5
+					opacity: circleOpacity
 				});
 
 		complaintCircles.append('title')
 			.text(function (d) {return d.idslash + ': ' + d.advert;});
+	};
 
-		// Bind and draw people
-		var circleRadius = 10,
-			circleRadiusHi = 20,
-			circleOpacity = 0.5,
-			circleOpacityLo = 0.1,
-			circleOpacityHi = 0.7;
-
+	var _drawLegend = function () {
 		people = svg.append('g')
 			.attr('class', 'people')
 				.selectAll('g')
@@ -193,14 +226,9 @@ define([
 					transform: 'rotate(90)'
 				})
 				.text(function (d) {return d;});
+	};
 
-		// Remove loader
-		// Timeout allows CSS transitions to take place
-		window.setTimeout(function () {
-			$(svg[0]).closest('.loading').removeClass('loading');
-		}, 0.5);
-
-		// Bind events
+	var _bindEvents = function () {
 		complaintCircles
 			.on('mouseover', function (e) {
 				people.data(membersSorted).selectAll('circle')
