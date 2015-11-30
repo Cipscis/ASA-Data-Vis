@@ -18,8 +18,34 @@
 	</script>
 
 
-	<div class="loading">
+	<div class="loading chart-area">
 		<svg class="asa-data" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+	</div>
+
+	<div class="grid">
+		<div class="grid__item one-half">
+			<form class="js-controls controls">
+				<ul class="controls__list">
+					<li class="controls__list-item">
+						<label>JSON URL: <input type="text" placeholder="JSON URL" value="complaints" class="js-json-url-input" /></label>
+					</li>
+					<li class="controls__list-item">
+						<label>Running Average Length: <input type="number" placeholder="Running Average Length" value="90" class="js-running-average-length" />
+					</li>
+				</ul>
+				<input type="submit" value="Refresh" />
+			</form>
+		</div>
+		<div class="grid__item one-half">
+			<ul class="controls__list">
+				<li><a href="complaints" class="js-json-url-option">All complaints</a></li>
+				<li><a href="sbh/all" class="js-json-url-option">SBH complaints</a></li>
+				<li><a href="media/television" class="js-json-url-option">Television</a></li>
+				<li><a href="media/newspaper" class="js-json-url-option">Newspaper</a></li>
+				<li><a href="category/therapeutic" class="js-json-url-option">Therapeutic</a></li>
+				<li><a href="complainant/M.+Hanna" class="js-json-url-option">M. Hanna</a></li>
+			</ul>
+		</div>
 	</div>
 </body>
 </html>

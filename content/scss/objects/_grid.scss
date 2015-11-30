@@ -1,0 +1,14 @@
+.grid {
+	@extend .cf;
+
+	margin-left: -20px;
+}
+
+.grid__item {
+	padding-left: 20px;
+	float: left;
+}
+
+.one-half {
+	width: 50%;
+}

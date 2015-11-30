@@ -5,6 +5,8 @@ define([
 ], function ($, d3, util) {
 
 	var url,
+		urlBase = 'http://asa.sbh.nz/',
+		urlExt = '.json',
 
 		complaints, days,
 		runningAverage,
@@ -32,6 +34,7 @@ define([
 
 		_createSvg();
 		_getData();
+		_bindControlEvents();
 	};
 
 	var _createSvg = function () {
@@ -146,7 +149,8 @@ define([
 	};
 
 	var _createRunningAverage = function () {
-		// Create running average
+		var i, j;
+
 		runningAverage = [];
 		for (i = aveL-1; i < days.length; i++) {
 			runningAverage.push({
@@ -163,6 +167,10 @@ define([
 				runningAverage[i-(aveL-1)].complaints += days[i-j].complaints.length / (aveL);
 			}
 		}
+	};
+
+	var _clearInteractive = function () {
+		$(svg[0]).find('*').remove();
 	};
 
 	var _createInteractive = function () {
@@ -379,12 +387,48 @@ define([
 		return title;
 	};
 
+	var _addLoader = function () {
+		$(svg[0]).closest('.chart-area').addClass('loading');
+	};
+
 	var _removeLoader = function () {
 		// Remove loader
 		// Timeout allows CSS transitions to take place
 		window.setTimeout(function () {
-			$(svg[0]).closest('.loading').removeClass('loading');
+			$(svg[0]).closest('.chart-area').removeClass('loading');
 		}, 0.5);
+	};
+
+	var _bindControlEvents = function () {
+		$('.js-controls').on('submit', _refreshFromControls);
+		$('.js-json-url-option').on('click', _refreshWithOption);
+	};
+
+	var _refreshFromControls = function (e) {
+		var urlVal = $('.js-controls').find('.js-json-url-input').val();
+
+		url = urlVal ? urlBase + urlVal + urlExt : url;
+		aveL = $('.js-controls').find('.js-running-average-length').val() || aveL;
+
+		_clearInteractive();
+		_addLoader();
+
+		try {
+			_getData();
+		} catch (error) {
+			console.error(error);
+		}
+
+		return false;
+	};
+
+	var _refreshWithOption = function (e) {
+		var option = $(e.target).attr('href');
+
+		$('.js-json-url-input').val(option);
+		$('.js-controls').trigger('submit');
+
+		return false;
 	};
 
 	return {
