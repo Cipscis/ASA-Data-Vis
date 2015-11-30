@@ -104,6 +104,10 @@ circle {
   float: left;
 }
 
+.one-whole {
+  width: 100%;
+}
+
 .one-half {
   width: 50%;
 }
