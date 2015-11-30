@@ -7,11 +7,19 @@
 	<link rel="stylesheet" href="content/css/style.css" />
 </head>
 <body>
-	<p>Advertising Standards Authority data visualisations:</p>
+	<script type="text/javascript">
+		require(['jquery'], function ($) {
+			$(function () {
+				require(['asa/sbhBubbles'], function (asa) {
+					asa.init();
+				});
+			});
+		});
+	</script>
 
-	<ul>
-		<li><a href="bubbles.html">Society for Science Based Healthcare complaints (bubbles)</a></li>
-		<li><a href="area.html">Area graph</a></li>
-	</ul>
+
+	<div class="loading">
+		<svg class="asa-data" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+	</div>
 </body>
 </html>
