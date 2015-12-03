@@ -234,7 +234,7 @@ define([
 	var _bindEvents = function () {
 		complaintCircles
 			.on('mouseover', function (e) {
-				people.data(membersSorted).selectAll('circle')
+				people.selectAll('circle')
 					.attr({
 						r: function (d) {
 							return util.contains(d, e.complainants) ? circleRadiusHi : circleRadius;
